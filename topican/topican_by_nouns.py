@@ -1,41 +1,27 @@
-
 # coding: utf-8
 
-# # Topic Analyser
-# 
-# Output topics contained within free-text.
-# 
-# 
-# Citations:
-# 
-# (1) Uses spaCy - a free, open-source package for "Industrial Strength NLP" (Natural Language Processing)
-# 
-# (2) spaCy uses gloVe - Global Vectors for Word Representation Ref: Jeffrey Pennington, Richard Socher, and Christopher D. Manning. 2014. https://nlp.stanford.edu/pubs/glove.pdf
-# 
+"""
+Package: Topican - Topic Analyser
 
-NO_RESPONSE_STR = 'missing_no_answer_given'
-NOT_YET_CODED_STR = 'missing_not_yet_coded'
-NOT_APPLICABLE_STR = 'not_applicable'
+Module: topican_by_nouns.py
+Identify topics by finding the top noun groups (nouns with 'synonyms') in free-text pandas and the top words
+words associated with them.
+ 
+Citations:
+(1) Uses spaCy - a free, open-source package for "Industrial Strength NLP" (Natural Language Processing)
 
-# Artificial words/word-phrases to ignore - as requested by the researchers
-exclude_words=['junk', NO_RESPONSE_STR, NOT_YET_CODED_STR, NOT_APPLICABLE_STR]
-capitalized = [w.capitalize() for w in exclude_words]
-for word in capitalized: exclude_words.append(word)
-exclude_words_without_stop_words = exclude_words
+(2) spaCy uses gloVe - Global Vectors for Word Representation Ref: Jeffrey Pennington, Richard Socher, and
+Christopher D. Manning. 2014. https://nlp.stanford.edu/pubs/glove.pdf
+"""
 
-# Add 'stop' words and their capitalisations to the list of words to ignore
-import nltk
-# Download stopwords if not already done
-##nltk.download('stopwords')
-from nltk.corpus import stopwords
-stop_words = stopwords.words('english')
-for word in stop_words: exclude_words.append(word)
-capitalized_stop_words = [w.capitalize() for w in stop_words]
-for word in capitalized_stop_words: exclude_words.append(word)
-print("words that will be excluded (not so useful 'stop-words' and artificial words):", exclude_words)
+# Name for group containings words that are not known in the language model (potentially spelling errors)
+_UNKNOWN_GROUP_ROOT_WORD = "_Unknown/Spelling_Error"
+
+# Name for group containings words that are not known in the language model but were not grouped
+_OTHER_GROUP_ROOT_WORD = "_OTHER"
 
 # spaCy class to perform various operations on free-text
-# - spaCy has several powerful features which were not explored in detail in the Fellowship project. These features include Part-Of-Speech tagging (POS) and Dependency Trees to yield a deeper understanding of the text.
+# - spaCy has several powerful features including Part-Of-Speech tagging (POS) and Dependency Trees to yield a deeper understanding of the text.
 import string
 from collections import Counter
 
@@ -43,26 +29,27 @@ class SpaCyFreeText():
     """
     Class to perform some spaCy operations on a free-text Panda Series object.
 
-    Per recommendation from ASI's Tom Begley, as the size of the text data is not very small, spaCy’s `pipe`
-    is used to iterate over the text. This improves speed by accumulating a buffer and operating on the text
-    in parallel. However, Tom adds a note of caution, including with the argument 'n_threads', which appears
-    to make no difference no matter what it is set to.
+    As the size of the text data is not very small, spaCy’s `pipe` is used to iterate over the text. This 
+    improves speed by accumulating a buffer and operating on the text
+    in parallel. However, as a note of caution, the argument 'n_threads' appears to make no difference.
 
-    Warning: spaCy token.similarity(other) has a bug when 'other' has length 1, producing the
-    following error:
-        # "TypeError: 'spacy.tokens.token.Token' object does not support indexing"
+    Warning: At the time of coding, spaCy token.similarity(other) has a bug when 'other' has length 1, 
+    producing the following error:
+        "TypeError: 'spacy.tokens.token.Token' object does not support indexing"
     The work-around used is to ignore tokens with length 1.
     """
 
     def __init__(self, nlp, name, free_text_Series):
-        """ Instantiate the class with the specified spaCy nlp object """
+        """
+        Instantiate the class with the specified spaCy nlp object.
+        """
         self.nlp = nlp
         self.name = name
         
         # Add a full-stop to the end of each free-text item if it does not already end in punctuation.
-        # Replace null entries and remove unnecessary angle-quotes (as requested by Zorana)
+        # Replace null entries and remove unnecessary angle-quotes.
         self.free_text_list = []
-        for value in free_text_Series.fillna(NO_RESPONSE_STR).str.replace("‘", "").replace("’", ""):
+        for value in free_text_Series:
             last_char = value[-1]
             if last_char not in string.punctuation:
                 value += "."
@@ -242,14 +229,7 @@ class SpaCyFreeText():
             print("All", end='')
         print(" dep trees for", self.name, most_common_dep_trees)
 
-# Name for group containings words that are not known in the language model (potentially spelling errors)
-UNKNOWN_GROUP_ROOT_WORD = "_Unknown/Spelling_Error"
-
-# Name for group containings words that are not known in the language model but were not grouped
-OTHER_GROUP_ROOT_WORD = "_OTHER"
-
 import nltk
-## nltk.download('wordnet')
 from nltk.corpus import wordnet as wn
 from nltk.corpus.reader.wordnet import WordNetError
 from nltk.stem.wordnet import WordNetLemmatizer
@@ -375,20 +355,21 @@ def get_top_word_groups_by_synset_then_similarity(
 
     Some considerations:
     - The use of WordNet synsets or spaCy similarity by themselves are as useful as required. This is for 2 reasons:
-      (1) Some of the Yale survey responses (both emotions and their reasons) contain both formal and informal
-      language. For example, shit'. The advantage of using spaCY with language model 'en_core_web_lg' is that this
-      model was trained on both formal and informal language. However, the word vectors in this spaCy language model
-      incorporate all senses of a word and each part of speech. 
+      (1) Some free-text may contain both formal and informal language.
+      The advantage of using spaCY with language model 'en_core_web_lg' is that this model was trained on both formal and informal
+      language. However, the word vectors in this spaCy language model incorporate all senses of a word and each part of speech. 
     - Hence a combination of WordNet synsets and spaCy similarity is used. WordNet synsets are applied first to parse
-      formally defined words, then spaCy similarity is used to catch more informal words. A possible further
+      formally defined words, then spaCy similarity is used to catch some other words. A possible further
       refinement might be to take user-defined groupings.
     - It is assumed that 'stop' words and certain artificial words have been removed if required *before* the
       function call (very common words such as "I" that may not be very useful in the word grouping)
-    - There are US-specific usages in the survey text, e.g. 'pissed' used as the emotion 'angry'.
+    - The language model may contain country-specific, e.g. in the US 'pissed' as the meaning 'angry' but a different meaning in
+      UK English.
 
     Note: spaCy internally uses gloVe word vectors - see citations above.
         
     """
+
     # Word "lemmatization" is necessary as plurals are not stored in the WordNet synsets
     Lem = WordNetLemmatizer()
     
@@ -417,8 +398,8 @@ def get_top_word_groups_by_synset_then_similarity(
             root_word, root_and_syn_count = root_word_tuple
             root_word = root_word.lower()
             if root_word[0] == '_': root_word = root_word[1:]
-            print("DEBUG: Adding pre-defined root word '" + root_word + "' with root_and_syn_tuple_list:",
-                  root_and_syn_tuple_list)
+            ##print("DEBUG: Adding pre-defined root word '" + root_word + "' with root_and_syn_tuple_list:",
+            ##      root_and_syn_tuple_list)
             try:
                 lemword = Lem.lemmatize(root_word)
                 hyponyms = get_hyponyms(lemword, max_hyponym_depth)
@@ -433,9 +414,9 @@ def get_top_word_groups_by_synset_then_similarity(
             most_common[root_word]['root_and_syn_count'] = 0
             most_common[root_word]['root_and_syns'] = root_and_syn_tuple_list
             most_common[root_word]['hyponyms'] = hyponyms
-            print("DEBUG: with hyponyms:", hyponyms)
+            ##print("DEBUG: with hyponyms:", hyponyms)
             most_common[root_word]['lemmatization'] = lemword
-            print("DEBUG: and lemmatization:", lemword)
+            ##print("DEBUG: and lemmatization:", lemword)
             try:
                 most_common[root_word]['root_token'] = spacy_dict[root_word]
             except KeyError:
@@ -449,7 +430,7 @@ def get_top_word_groups_by_synset_then_similarity(
             first_stored = True
             for word_tuple in root_and_syn_tuple_list:
                 word, word_count = word_tuple
-                print("DEBUG: with pre-defined synonym: '" + word + "'")
+                ##print("DEBUG: with pre-defined synonym: '" + word + "'")
             
     for word_freq in word_freqs:
         word, count = word_freq
@@ -620,7 +601,7 @@ def get_top_word_groups_by_synset_then_similarity(
                     other_word_freqs.append(word_freq)
                     break;
             total_other_words += word_count
-        other_word_group_tuple = (OTHER_GROUP_ROOT_WORD, total_other_words)
+        other_word_group_tuple = (_OTHER_GROUP_ROOT_WORD, total_other_words)
         top_word_groups.append((other_word_group_tuple, other_word_freqs))
         
     if len(potential_spelling_errors) > 0:
@@ -636,7 +617,7 @@ def get_top_word_groups_by_synset_then_similarity(
                     unknown_word_freqs.append(word_freq)
                     break;
             total_unknown_words += word_count
-        unknown_word_group_tuple = (UNKNOWN_GROUP_ROOT_WORD, total_unknown_words)
+        unknown_word_group_tuple = (_UNKNOWN_GROUP_ROOT_WORD, total_unknown_words)
         top_word_groups.append((unknown_word_group_tuple, unknown_word_freqs))
     
     # Check all words were accounted for
@@ -675,7 +656,11 @@ def print_words_associated_with_common_noun_groups(
     - nlp: spaCy object pre-initialised with the required langauge model
     - name: descriptive name for free_text_Series
     - free_text_Series: pandas Series of free_text in which to find the noun groups and associated words
-    - exclude_words: to ignore certain words, e.g. not so useful 'stop words' or artificial words
+    - exclude_words: to ignore certain words, e.g. not so useful 'stop words' or artificial words.
+      This should take one of the following values:
+      - True: to ignore NTLK stop-words
+      - A list of words to exclude
+      - False or None otherwise
     - top_n_noun_groups: number of noun groups to find (specify 'None' means find all noun/'synonym' groups)
     - top_n_words: number of words that are associated with each noun group (specify 'None' for all words)
     - max_hyponyms: the maximum number of hyponyms a word may have before it is ignored (this is used to
@@ -689,9 +674,9 @@ def print_words_associated_with_common_noun_groups(
     (3) If no associated word is found, it is assumed the word itself is the only context for the text. For example,
         with noun group "_work", the following free text items would result in the noun itself ('work') being
         reported as an associated word: 'The work that I do', 'Work', 'work.'
-        This seems to work in the majority of sample of cases used but has not been exhaustively tested. In
-        particular, this may give surprising results if the "synonym" matching does not actually give the desired
-        synonyms and incorrect results if NUM_CONTEXT_WORDS is too short to capture significant context.
+        This seems to work in the majority of cases but has not been exhaustively tested. In
+        particular, this might give surprising results if the "synonym" matching does not actually give the desired
+        synonyms and may give incorrect results if NUM_CONTEXT_WORDS is too short to capture significant context.
         
     Known restrictions/issues:
     (a) The parsing of associated words looks only at words that are up to NUM_CONTEXT_WORDS words before or after
@@ -712,9 +697,22 @@ def print_words_associated_with_common_noun_groups(
     (iv)  For large text, parallelisation would help performance.
     """
     
-    print("Parsing", name, "using English language model", SPACY_MODEL)
     text_spaCy = SpaCyFreeText(nlp, name, free_text_Series)
     free_text_list = text_spaCy.get_free_text_list()
+    
+    exclude_word_list = []
+    if exclude_words==True:
+        # Exclude 'stop' words and their capitalisations
+        import nltk
+        from nltk.corpus import stopwords
+        stop_words = stopwords.words('english')
+        for word in stop_words: exclude_word_list.append(word)
+        capitalized_stop_words = [w.capitalize() for w in stop_words]
+        for word in capitalized_stop_words: exclude_word_list.append(word)
+    elif exclude_words:
+        exclude_word_list = exclude_words
+    if exclude_words:
+        print("Words that will be excluded:", exclude_word_list)
     
     # Get frequencies of all nouns and proper nouns in the free-text Series
     all_noun_and_propn_freqs = text_spaCy.get_most_common_nouns_and_propns(None, exclude_words)
@@ -736,7 +734,7 @@ def print_words_associated_with_common_noun_groups(
     for item in top_word_groups:
         root_word_freq, group_word_freqs = item
         root_word, root_word_count = root_word_freq
-        if root_word != OTHER_GROUP_ROOT_WORD and root_word != UNKNOWN_GROUP_ROOT_WORD:
+        if root_word != _OTHER_GROUP_ROOT_WORD and root_word != _UNKNOWN_GROUP_ROOT_WORD:
             NO_WORD = "no_word"
             assoc_word_list = [] # List of associated words for each noun/proper nount group
             for word_freq in group_word_freqs:
