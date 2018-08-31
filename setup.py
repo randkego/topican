@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="topican",
-    version="0.0.2",
+    version="0.0.8",
     author="Richard Smith",
     author_email="randkego@gmail.com",
     description="Topic analyser",
@@ -15,6 +15,7 @@ setuptools.setup(
     license='MIT',
     packages=setuptools.find_packages(),
     classifiers=(
+        "Development Status :: 2 - Pre-Alpha",
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
