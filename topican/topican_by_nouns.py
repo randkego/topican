@@ -21,6 +21,7 @@ import string
 import re
 import pandas as pd
 from collections import Counter
+from collections import OrderedDict
 import nltk
 from nltk.corpus import wordnet as wn
 from nltk.corpus.reader.wordnet import WordNetError
@@ -386,12 +387,15 @@ def get_top_word_groups_by_synset_then_similarity(
     for spacy_token in nlp(document):
         word = spacy_token.lower_
         spacy_dict[word] = spacy_token
-    #for item in spacy_dict: print(spacy_dict[item])
+    #for item in spacy_dict: print("DEBUG: spacy_dict[" + item + "]: " + spacy_dict[item])
     
     # Build a list of most-common word "groups", grouping words that are WordNet "hyponyms"
-    most_common = {}                   # The most common words and their synonyms
+    most_common = OrderedDict()        # The most common words and their synonyms.
+                                       # Note: this needs to be in order of insertion in order to retain the
+                                       # frequency order from word_freqs (insertion order is only guaranteed in the
+                                       # default dictionaries from CPython 3.6+)
     potential_spelling_errors = set()
-    already_grouped = set()            # Words already grouped
+    already_grouped = set()            # Words already grouped - either a root word or one of its hyponyms
     first_stored = False
     
     if user_defined_groups:
@@ -448,7 +452,7 @@ def get_top_word_groups_by_synset_then_similarity(
                         continue
                         ##print("DEBUG: Word '" + word + "'" + "(lemmatized as '" + lemword + "') exceeds hyponym limit")
                     else:
-                        # Store the first most common word as the first word group
+                        # Store the first most common word as the 'root' of the first word group
                         ##print("DEBUG: Adding root word '" + word + "' with hyponyms:", hyponyms)
                         most_common[word] = {}
                         most_common[word]['root_and_syn_count'] = count
@@ -462,8 +466,7 @@ def get_top_word_groups_by_synset_then_similarity(
                     ##print("DEBUG: Word not known in the WordNet synsets: '" + word + "'")
                     potential_spelling_errors.add(word)
             else:
-                # Store the common word as a new word group if there are no existing
-                # "synonyms" in the most_common dictionary
+                # Store the common word as a new word group if there are no existing "synonyms" in the most_common dictionary
                 synonym_or_match_found = False
                 for common in most_common:
                     if common == word:
@@ -512,15 +515,16 @@ def get_top_word_groups_by_synset_then_similarity(
     other_words = set()
     for word_freq in word_freqs:
         word, count = word_freq
-        if word not in already_grouped: other_words.add(word)
-        ##print("DEBUG: Adding", word, "not in already_grouped to other_words")
+        if word not in already_grouped:
+            other_words.add(word)
+            ##print("DEBUG: Adding '" + word + "' not in already_grouped to other_words")
     for word in potential_spelling_errors:
         other_words.add(word)
-        ##print("DEBUG: Adding", word, "in potential_spelling_errors to other_words")
+        ##print("DEBUG: Adding '" + word + "' in potential_spelling_errors to other_words")
 
     # ... i.e. update the list of most-common word "groups" formed from WordNet synsets with words that have similar
     # enough spaCy token.similarity. Words that were not known in synsets may be known in spaCy so reset the list of
-    # potential spelling errors. Note tokens with a length of 1 are ignored as a work-around for a spaCy
+    # potential spelling errors. Note that tokens with a length of 1 are ignored as a work-around for a spaCy
     # token.similarity(other) bug
 
     potential_spelling_errors = set()
@@ -582,6 +586,7 @@ def get_top_word_groups_by_synset_then_similarity(
     top_word_groups = []
     other_words = []
     for index, word in enumerate(most_common):
+        ##print("DEBUG: most_common: index " + str(index) + " word: '" + word + "'")
         if index < n_word_groups:
             word_group_tuple = ("_" + word, most_common[word]['root_and_syn_count'])
             root_and_syns_list = []
@@ -590,7 +595,7 @@ def get_top_word_groups_by_synset_then_similarity(
             top_word_groups.append((word_group_tuple, root_and_syns_list))
         elif word not in potential_spelling_errors:
             other_words.append(word)
-            
+    
     if other_words:
         # Words that were not potential spelling errors that did not make it into a word group
         total_other_words = 0
@@ -729,7 +734,7 @@ def print_words_associated_with_common_noun_groups(
     print(" associated with nouns/proper noun groupings, looking at up to",
           str(NUM_CONTEXT_WORDS), "words before or after each noun:")
 
-    ##print("DEBUG:", top_word_groups)
+    ##print("DEBUG: top_word_groups", top_word_groups)
     for item in top_word_groups:
         root_word_freq, group_word_freqs = item
         root_word, root_word_count = root_word_freq
