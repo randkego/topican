@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="topican",
-    version="0.0.9",
+    version="0.0.10",
     author="Richard Smith",
     author_email="randkego@gmail.com",
     description="Topic analyser",

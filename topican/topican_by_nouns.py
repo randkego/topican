@@ -28,14 +28,18 @@ from collections import Counter
 class SpaCyFreeText():
     """
     Class to perform some spaCy operations on a free-text Panda Series object.
-
+    Any NaN values in the text are replaced by the empty string.
+    To aid Part Of Speech and dependency tree parsing, a full-stop is added to any items in the Series
+    that do not already end in punctuation.
+    
     As the size of the text data is not very small, spaCy’s `pipe` is used to iterate over the text. This 
-    improves speed by accumulating a buffer and operating on the text
-    in parallel. However, as a note of caution, the argument 'n_threads' appears to make no difference.
+    improves speed by accumulating a buffer and operating on the text in parallel (NB the argument
+    'n_threads' appears to make no difference).
 
     Warning: At the time of coding, spaCy token.similarity(other) has a bug when 'other' has length 1, 
     producing the following error:
         "TypeError: 'spacy.tokens.token.Token' object does not support indexing"
+        
     The work-around used is to ignore tokens with length 1.
     """
 
@@ -46,16 +50,13 @@ class SpaCyFreeText():
         self.nlp = nlp
         self.name = name
         
-        # Add a full-stop to the end of each free-text item if it does not already end in punctuation.
-        # Replace null entries and remove unnecessary angle-quotes.
         self.free_text_list = []
-        for value in free_text_Series:
-            last_char = value[-1]
-            if last_char not in string.punctuation:
-                value += "."
+        for value in free_text_Series.fillna(""):
+            if len(value) > 0:
+                if value[-1] not in string.punctuation: value += "."
             self.free_text_list.append(value)
         free_text_Series = pd.Series(self.free_text_list)
-        
+
         # Create a spaCy document for each item in the free-text
         self.doc_list = []
         for doc in self.nlp.pipe(free_text_Series):
@@ -715,7 +716,7 @@ def print_words_associated_with_common_noun_groups(
         print("Words that will be excluded:", exclude_word_list)
     
     # Get frequencies of all nouns and proper nouns in the free-text Series
-    all_noun_and_propn_freqs = text_spaCy.get_most_common_nouns_and_propns(None, exclude_words)
+    all_noun_and_propn_freqs = text_spaCy.get_most_common_nouns_and_propns(None, exclude_word_list)
     print(str(len(all_noun_and_propn_freqs)), "unique nouns/proper nouns found")
     
     # Get "synonym" groupings of the nouns and proper nouns (either wordnet hyponyms or spaCy similarity)"
@@ -768,7 +769,7 @@ def print_words_associated_with_common_noun_groups(
                                     ##print("DEBUG: negation '" + negation + "' added to assoc_word_list for word '" +
                                     ##      word + "' in free_text '" + free_text + "'")
                                     break
-                                elif before_word not in exclude_words:
+                                elif before_word not in exclude_word_list:
                                     word_before_before_word = before_words[before_words_len-index-2]
                                     if word_before_before_word:
                                         if word_before_before_word == "not" or word_before_before_word[-3:] == "n't":
@@ -804,7 +805,7 @@ def print_words_associated_with_common_noun_groups(
                                             ##print("DEBUG: negation '" + negation + "' added to assoc_word_list for word '" +
                                             ##      word + "' in free_text '" + free_text + "'")
                                         break
-                                    elif after_word not in exclude_words:
+                                    elif after_word not in exclude_word_list:
                                         assoc_word_list.append(after_word)
                                         assoc_word = after_word
                                         ##print("DEBUG: after_word '" + after_word + "' added to assoc_word_list for word '" +
