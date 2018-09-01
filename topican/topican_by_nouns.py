@@ -1,15 +1,12 @@
 # coding: utf-8
-
 """
 Package: Topican - Topic Analyser
-
 Module: topican_by_nouns.py
 Identify topics by finding the top noun groups (nouns with 'synonyms') in free-text pandas and the top words
 words associated with them.
  
 Citations:
 (1) Uses spaCy - a free, open-source package for "Industrial Strength NLP" (Natural Language Processing)
-
 (2) spaCy uses gloVe - Global Vectors for Word Representation Ref: Jeffrey Pennington, Richard Socher, and
 Christopher D. Manning. 2014. https://nlp.stanford.edu/pubs/glove.pdf
 """
@@ -20,14 +17,24 @@ _UNKNOWN_GROUP_ROOT_WORD = "_Unknown/Spelling_Error"
 # Name for group containings words that are not known in the language model but were not grouped
 _OTHER_GROUP_ROOT_WORD = "_OTHER"
 
-# spaCy class to perform various operations on free-text
-# - spaCy has several powerful features including Part-Of-Speech tagging (POS) and Dependency Trees to yield a deeper understanding of the text.
 import string
+import re
+import pandas as pd
 from collections import Counter
+import nltk
+from nltk.corpus import wordnet as wn
+from nltk.corpus.reader.wordnet import WordNetError
+from nltk.stem.wordnet import WordNetLemmatizer
+from nltk.corpus import stopwords
+import spacy
 
 class SpaCyFreeText():
     """
     Class to perform some spaCy operations on a free-text Panda Series object.
+    
+    spaCy has many powerful features, including Part-Of-Speech tagging (POS) and Dependency Trees to yield a deeper
+    understanding of text. 
+
     Any NaN values in the text are replaced by the empty string.
     To aid Part Of Speech and dependency tree parsing, a full-stop is added to any items in the Series
     that do not already end in punctuation.
@@ -229,11 +236,6 @@ class SpaCyFreeText():
         else:
             print("All", end='')
         print(" dep trees for", self.name, most_common_dep_trees)
-
-import nltk
-from nltk.corpus import wordnet as wn
-from nltk.corpus.reader.wordnet import WordNetError
-from nltk.stem.wordnet import WordNetLemmatizer
 
 def make_synset(word, category='n', number='01'):
     """Conveniently make a synset"""
@@ -634,8 +636,6 @@ def get_top_word_groups_by_synset_then_similarity(
 
 
 # Print topics by finding words associated with each noun group
-import re
-
 def get_words_around(target, text, n_words):
     """
     Helper function for print_words_associated_with_common_noun_groups to return n_words before or
@@ -704,8 +704,6 @@ def print_words_associated_with_common_noun_groups(
     exclude_word_list = []
     if exclude_words==True:
         # Exclude 'stop' words and their capitalisations
-        import nltk
-        from nltk.corpus import stopwords
         stop_words = stopwords.words('english')
         for word in stop_words: exclude_word_list.append(word)
         capitalized_stop_words = [w.capitalize() for w in stop_words]
