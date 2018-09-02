@@ -87,7 +87,7 @@ npm test
 
 ## Release History
 
-* 0.0.14
+* 0.0.15
     * Work in progress
 
 ## Meta
