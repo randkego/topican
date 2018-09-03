@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="topican",
-    version="0.0.16",
+    version="0.0.17",
     author="Richard Smith",
     author_email="randkego@gmail.com",
     description="Topic analyser",
@@ -20,4 +20,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ),
+    data_files=[('images', ['images/readme_usage_output.png', ]),]
 )
