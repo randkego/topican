@@ -11,7 +11,7 @@ setuptools.setup(
     description="Topic analyser",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/pypa/topican",
+    url="https://github.com/randkego/topican",
     license='MIT',
     packages=setuptools.find_packages(),
     classifiers=(
@@ -20,5 +20,5 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ),
-    data_files=[('images', ['images/readme_usage_output.png', ]),]
+    data_files=[('images', ['images/readme_usage_output.png', ]),],
 )

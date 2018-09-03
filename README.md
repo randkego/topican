@@ -3,7 +3,7 @@
 ```python3
 topican.print_words_associated_with_common_noun_groups
 ```
-Identifies topics by assuming a topics can be identified from Nouns and a "context" word:  
+Identifies topics by assuming topics can be identified from Nouns and a "context" word:  
 - spaCy is used to identify Nouns (including Proper nouns) in the text  
 - nltk WordNet and spaCy are used to group similar nouns together (WordNet "hyponyms" are checked first; spaCy similarity is used if a hyponym is not found)  
 - the top context words are found for each noun  
@@ -11,7 +11,7 @@ Identifies topics by assuming a topics can be identified from Nouns and a "conte
 
 For example, the text "I like python", "I love Python", and "I like C" would be analysed as having 2 topic groups:
 
-    '_python', 2: \[('like', 1), ('love', 1),] 
+    '_python', 2: [('like', 1), ('love', 1),] 
     '_C', 1: [('like', 1), ] 
 
 ## Meta
@@ -78,7 +78,7 @@ nlp = spacy.load('en_core_web_lg')
 import topican
 topican.print_words_associated_with_common_noun_groups(nlp, "test", test_df['Text_col'], False, 10, None, 100, 1, 0.7)
 ```
-![](readme_usage_output.png)
+![alt text](images/readme_usage_output.png "topican usage example")
 
 ## Release History
 
