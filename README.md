@@ -34,6 +34,7 @@ pip3 install spacy
 # Install spaCy's large English language model
 # ** Warning: this requires approx 1GB of disk space
 python3 -m spacy download en_core_web_lg
+
 ```
 
 Topican:
@@ -41,6 +42,11 @@ Topican:
 ```sh
 pip3 install topican
 ```
+
+Notes: Additional pre-requisites for Windows:  
+- The spacy install will fail if Microsoft Visual C++ is not already installed: https://visualstudio.microsoft.com/visual-cpp-build-tools/ may be helpful  
+- The download of spaCy's en_core_web_lg may be unable to create a symbolic link. This can be manually created if required
+
 
 ## Usage
 
@@ -70,6 +76,9 @@ topican.print_words_associated_with_common_noun_groups(
 import pandas as pd
 test_df = pd.DataFrame({'Text_col' : ["I love Python", "I really love python", "I like python.", "python", "I like C but I prefer Python", "I don't like C any more", "I don't like python", "I really don't like C"]})
 
+import nltk
+nltk.download('wordnet')
+
 # Load spaCy's large English language model (the large model is required to be able to use similarity)
 # ** Warning: this requires approx 2GB of RAM
 import spacy
@@ -83,7 +92,9 @@ topican.print_words_associated_with_common_noun_groups(nlp, "test", test_df['Tex
 ## Release History
 
 * 0.0.17
-    * Work in progress
+    * First release to GitHub
+* 0.0.18
+    * Updates to README.md to note Windows install pre-requisites and the need to download wordnet
 
 ## Contributing
 
