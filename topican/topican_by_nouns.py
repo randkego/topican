@@ -344,7 +344,7 @@ def get_top_word_groups_by_synset_then_similarity(
     - word_freqs: list of (word,count) tuples in (decreasing) order of frequency
     - n_word_groups: number of word groups to find (specify 'None' means find all word/'synonym' groups)
     - max_hyponyms: the maximum number of hyponyms a word may have before it is ignored (this is used to
-      exclude very general words that may not convey useful information)
+      exclude very general words that may not convey useful information - specify 'None' to exclude none)
     - max_hyponym_depth specifies the level of hyponym to extract ('None' means find deepest)
     - sim_threshold: the spaCy similarity level that words must reach to qualify as being a 'synonym'
     - user_defined_groups: initial user-defined groupings. Note that "synonyms" for artificial words, such as
@@ -396,7 +396,7 @@ def get_top_word_groups_by_synset_then_similarity(
                                        # default dictionaries from CPython 3.6+)
     potential_spelling_errors = set()
     already_grouped = set()            # Words already grouped - either a root word or one of its hyponyms
-    first_stored = False
+    first_was_stored = False
     
     if user_defined_groups:
         # Add the user-defined "synonym" groups
@@ -434,7 +434,7 @@ def get_top_word_groups_by_synset_then_similarity(
                     spaCy_token_root_word = item                        
                 most_common[root_word]['root_token'] = spaCy_token_root_word
             already_grouped.add(root_word)
-            first_stored = True
+            first_was_stored = True
             for word_tuple in root_and_syn_tuple_list:
                 word, word_count = word_tuple
                 ##print("DEBUG: with pre-defined synonym: '" + word + "'")
@@ -444,11 +444,11 @@ def get_top_word_groups_by_synset_then_similarity(
         word = word.lower()
         if word not in already_grouped:
             ##print("DEBUG: word: '" + word + "', count: " + str(count))
-            if (not first_stored):
+            if (not first_was_stored):
                 try:
                     lemword = Lem.lemmatize(word)
                     hyponyms = get_hyponyms(lemword, max_hyponym_depth)
-                    if hyponyms and len(hyponyms) > max_hyponyms:
+                    if hyponyms and (max_hyponyms and len(hyponyms) > max_hyponyms):
                         continue
                         ##print("DEBUG: Word '" + word + "'" + "(lemmatized as '" + lemword + "') exceeds hyponym limit")
                     else:
@@ -461,7 +461,7 @@ def get_top_word_groups_by_synset_then_similarity(
                         most_common[word]['lemmatization'] = lemword
                         most_common[word]['root_token'] = spacy_dict[word]
                         already_grouped.add(word)
-                        first_stored = True
+                        first_was_stored = True
                 except WordNetError:
                     ##print("DEBUG: Word not known in the WordNet synsets: '" + word + "'")
                     potential_spelling_errors.add(word)
@@ -488,7 +488,7 @@ def get_top_word_groups_by_synset_then_similarity(
                     try:
                         lemword = Lem.lemmatize(word)
                         hyponyms = get_hyponyms(lemword, max_hyponym_depth)
-                        if hyponyms and len(hyponyms) > max_hyponyms:
+                        if hyponyms and (max_hyponyms and len(hyponyms) > max_hyponyms):
                             continue
                             ##print("DEBUG: Word '" + word + "'" + "(lemmatized as '" + lemword + "') exceeds hyponym limit")
                         else:
@@ -529,7 +529,7 @@ def get_top_word_groups_by_synset_then_similarity(
 
     potential_spelling_errors = set()
     already_grouped = set()
-    first_stored = False
+    first_was_stored = False
     for word_freq in word_freqs:
         word, count = word_freq
         if word in other_words:
@@ -587,7 +587,7 @@ def get_top_word_groups_by_synset_then_similarity(
     other_words = []
     for index, word in enumerate(most_common):
         ##print("DEBUG: most_common: index " + str(index) + " word: '" + word + "'")
-        if index < n_word_groups:
+        if n_word_groups is None or index < n_word_groups:
             word_group_tuple = ("_" + word, most_common[word]['root_and_syn_count'])
             root_and_syns_list = []
             for word_freq in most_common[word]['root_and_syns']:
@@ -715,8 +715,8 @@ def print_words_associated_with_common_noun_groups(
         for word in capitalized_stop_words: exclude_word_list.append(word)
     elif exclude_words:
         exclude_word_list = exclude_words
-    if exclude_words:
-        print("Words that will be excluded:", exclude_word_list)
+    ##if exclude_words:
+    ##    print("DEBUG: Words that will be excluded:", exclude_word_list)
     
     # Get frequencies of all nouns and proper nouns in the free-text Series
     all_noun_and_propn_freqs = text_spaCy.get_most_common_nouns_and_propns(None, exclude_word_list)

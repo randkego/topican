@@ -1,18 +1,21 @@
 # Topican - topic analyzer
 
 ```python3
-topican.print_words_associated_with_common_noun_groups
+script: topican_by_nouns_on_csv.py  
+
+function: topican.print_words_associated_with_common_noun_groups
 ```
-Identifies topics by assuming topics can be identified from Nouns and a "context" word:  
+Identify topics by assuming topics can be identified from Nouns and a "context" word:  
 - spaCy is used to identify Nouns (including Proper nouns) in the text  
 - nltk WordNet and spaCy are used to group similar nouns together (WordNet "hyponyms" are checked first; spaCy similarity is used if a hyponym is not found)  
-- the top context words are found for each noun  
+- the top context words are then found for each noun  
 - Output is a list of noun groups and associated context words, in order of frequency  
+- The output also indicates the nouns that were grouped together
 
-For example, the text "I like python", "I love Python", and "I like C" would be analysed as having 2 topic groups:
+For example, the text "I like python", "I love Python", and "I like C" would be analysed as having 2 topic groups "_python" and "_C":
 
-    '_python', 2: [('like', 1), ('love', 1),] 
-    '_C', 1: [('like', 1), ] 
+    '_python', 2: [('like', 1), ('love', 1),]    {('python', 2), }
+    '_C', 1: [('like', 1), ]    {('C', 1), }
 
 ## Meta
 Richard Smith – randkego@gmail.com
@@ -23,7 +26,7 @@ Distributed under the MIT license. See ``LICENSE`` for more information.
 
 ## Installation
 
-Pre-requisites:
+Pre-requisites (Linux and Windows):
 
 ```sh
 # Required packages
@@ -44,12 +47,18 @@ pip3 install topican
 ```
 
 Notes: Additional pre-requisites for Windows:  
-- The spacy install will fail if Microsoft Visual C++ is not already installed: https://visualstudio.microsoft.com/visual-cpp-build-tools/ may be helpful  
-- The download of spaCy's en_core_web_lg may be unable to create a symbolic link. This can be manually created if required
+- ```install spacy``` will fail if Microsoft Visual C++ is not already installed 
+([https://visualstudio.microsoft.com/visual-cpp-build-tools/](https://visualstudio.microsoft.com/visual-cpp-build-tools/) may help in this case)  
+- ```spaCy download en_core_web_lg``` may be unable to create a symbolic link. This can be manually created if required
 
 
 ## Usage
+Script:
+```python3
+python topican_by_nouns_on_csv.py <csv file path> <name of text column> <exclude word list> <top_n_noun_groups> <top_n_words> <max_hyponyms> <max_hyponym_depth> <sim_threshold>
+```
 
+function:
 ```python3
 topican.print_words_associated_with_common_noun_groups(
     nlp, name, free_text_Series, exclude_words, top_n_noun_groups, top_n_words, max_hyponyms, max_hyponym_depth, sim_threshold)
@@ -59,18 +68,24 @@ topican.print_words_associated_with_common_noun_groups(
 - free_text_Series: pandas Series of text in which to find the noun groups and associated words
 - exclude_words: to ignore certain words, e.g. not so useful 'stop words' or artificial words.  
   This should take one of the following values:  
-&nbsp;&nbsp;&nbsp;&nbsp;- True: to ignore NTLK stop-words and their capitalizations  
-&nbsp;&nbsp;&nbsp;&nbsp;- A list of words to exclude  
-&nbsp;&nbsp;&nbsp;&nbsp;- False or None otherwise
-- top_n_noun_groups: number of noun groups to find ('None' means find all noun/'synonym' groups)
+  <nbsp>- True: to ignore NTLK stop-words and their capitalizations  
+  <nbsp>- A list of words to exclude  
+  <nbsp>- False or None otherwise
+- top_n_noun_groups: number of noun groups to find (specify 'None' to find all noun/'synonym' groups)
 - top_n_words: number of words that are associated with each noun group (specify 'None' for all words)
 - max_hyponyms: the maximum number of hyponyms a word may have before it is ignored (this is used to
-  exclude very general words that may not convey useful information)
-- max_hyponym_depth: the level of hyponym to extract ('None' means find deepest)
+  exclude very general words that may not convey useful information: specify 'None' for no restriction)
+- max_hyponym_depth: the level of hyponym to extract (specify 'None' to find all levels)
 - sim_threshold: the spaCy similarity level that words must reach to qualify as being a similar word
+```
 
-## Usage example
+## Usage examples
+script:
+```python3
+python topican_by_nouns_on_csv.py test.csv text_col None 10 0 100 1 0.7
+```
 
+function:
 ```python3
 # Some text to test
 import pandas as pd
@@ -80,7 +95,7 @@ import nltk
 nltk.download('wordnet')
 
 # Load spaCy's large English language model (the large model is required to be able to use similarity)
-# ** Warning: this requires approx 2GB of RAM
+# ** Warning: this requires approx 1,8GB of RAM
 import spacy
 nlp = spacy.load('en_core_web_lg')
 
@@ -95,6 +110,10 @@ topican.print_words_associated_with_common_noun_groups(nlp, "test", test_df['Tex
     * First release to GitHub
 * 0.0.18
     * Updates to README.md to note Windows install pre-requisites and the need to download wordnet
+* 0.0.19
+    * Add script topican_by_nouns_on_csv to apply print_words_associated_with_common_noun_groups to a text column of a CSV file
+    * function get_top_word_groups_by_synset_then_similarity: allow max_hyponyms and n_word_groups to be None to indicate no restriction on them
+    * function print_words_associated_with_common_noun_groups: do not list words that will be excluded
 
 ## Contributing
 
