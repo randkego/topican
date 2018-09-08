@@ -77,7 +77,7 @@ topican.print_words_associated_with_common_noun_groups(
   exclude very general words that may not convey useful information: specify 'None' for no restriction)
 - max_hyponym_depth: the level of hyponym to extract (specify 'None' to find all levels)
 - sim_threshold: the spaCy similarity level that words must reach to qualify as being a similar word
-```
+
 
 ## Usage examples
 script:

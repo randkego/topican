@@ -8,6 +8,10 @@ Data_Final_N=14,645_6_17_18_*
 Data_Final_N=14,645_6_17_18_*
 sample_reasons.txt
 all_reasons.txt
+sample_reasons.csv
+all_reasons.csv
+print_words_associated_with_common_noun_groups_all_reasons.txt
+print_words_associated_with_common_noun_groups_sample_reasons.txt
 
 # Part 2 - Python ignore files - from https://github.com/github/gitignore/blob/master/Python.gitignore
 #
