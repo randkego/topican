@@ -43,7 +43,10 @@ def main(argv=sys.argv[1:]):
         sys.exit(2)
     
     if args.exclude_words == "None": args.exclude_words = None
-    elif args.exclude_words == "True": args.exclude_words = True
+    elif args.exclude_words == "True":
+        args.exclude_words = True
+        import nltk
+        nltk.download('stopwords')
     elif args.exclude_words == "False": args.exclude_words = False
     if args.top_n_noun_groups == 0: args.top_n_noun_groups = None
     if args.top_n_words == 0: args.top_n_words = None

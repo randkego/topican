@@ -134,6 +134,8 @@ topican.print_words_associated_with_common_noun_groups(nlp, "test", test_df['Tex
     * Update setup.py to add the packages required for installation
 * 0.0.22
     * topican_by_nouns_on_csv.py: fix main signature and add param to parser.parse_args so that topican_by_nouns_on_csv can be called from the command line; remove nargs='+' type for exclude_words
+* 0.0.23
+    * topican_by_nouns_on_csv.py: if exclude_words is True, nltk.download('stopwords')
     
 ## Contributing
 
