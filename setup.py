@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="topican",
-    version="0.0.20",
+    version="0.0.21",
     author="Richard Smith",
     author_email="randkego@gmail.com",
     description="Topic analyser",
@@ -26,4 +26,9 @@ setuptools.setup(
             'topican_by_nouns_on_csv = topican.topican_by_nouns_on_csv:main',
         ],
     },
+    install_requires=[
+        'pandas',
+        'nltk',
+        'spacy',
+    ],
 )

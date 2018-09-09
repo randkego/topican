@@ -33,11 +33,6 @@ Distributed under the MIT license. See ``LICENSE`` for more information.
 Pre-requisites (Linux and Windows):
 
 ```sh
-# Required packages
-pip3 install pandas
-pip3 install nltk
-pip3 install spacy
-
 # Install spaCy's large English language model
 # ** Warning: this requires approx 1GB of disk space
 python3 -m spacy download en_core_web_lg
@@ -120,7 +115,9 @@ topican.print_words_associated_with_common_noun_groups(nlp, "test", test_df['Tex
     * function print_words_associated_with_common_noun_groups: do not list words that will be excluded
 * 0.0.20
     * Update setup.py to add a topican_by_nouns_on_csv as an entry_point to console_scripts to be able to call that scipt directly
-
+* 0.0.21
+    * Update setup.py to add the packages required for installation
+    
 ## Contributing
 
 1. Fork it (<https://github.com/randkego/topican/fork>)
