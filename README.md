@@ -99,7 +99,7 @@ import nltk
 nltk.download('wordnet')
 
 # Load spaCy's large English language model (the large model is required to be able to use similarity)
-# ** Warning: this requires approx 1,8GB of RAM
+# ** Warning: this requires approx 1.8GB of RAM
 import spacy
 nlp = spacy.load('en_core_web_lg')
 
