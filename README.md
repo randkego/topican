@@ -5,7 +5,7 @@ from  the command line:
 topican_by_nouns_on_csv  
 ```
 Identify topics by assuming topics can be identified from Nouns and a "context" word:  
-- [spacy](https://spacy.io/) is used to identify Nouns (including Proper nouns) in the text  
+- [spaCy](https://spacy.io/) is used to identify Nouns (including Proper nouns) in the text  
 - nltk WordNet and spaCy are used to group similar nouns together (WordNet "hyponyms" are checked first; spaCy similarity is used if a hyponym is not found)  
 - the top context words are then found for each noun  
 - Output is a list of noun groups and associated context words, in order of frequency  
