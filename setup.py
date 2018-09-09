@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="topican",
-    version="0.0.19",
+    version="0.0.20",
     author="Richard Smith",
     author_email="randkego@gmail.com",
     description="Topic analyser",
@@ -21,4 +21,9 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ),
     data_files=[('images', ['images/readme_usage_output.png', ]),],
+    entry_points={
+        'console_scripts': [
+            'topican_by_nouns_on_csv = topican.topican_by_nouns_on_csv:main',
+        ],
+    },
 )

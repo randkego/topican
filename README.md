@@ -1,9 +1,12 @@
 # Topican - topic analyzer
 
+from  the command line:
 ```python3
-script: topican_by_nouns_on_csv.py  
-
-function: topican.print_words_associated_with_common_noun_groups
+topican_by_nouns_on_csv  
+```
+as a function:
+```python3
+topican.print_words_associated_with_common_noun_groups
 ```
 Identify topics by assuming topics can be identified from Nouns and a "context" word:  
 - spaCy is used to identify Nouns (including Proper nouns) in the text  
@@ -13,9 +16,10 @@ Identify topics by assuming topics can be identified from Nouns and a "context" 
 - The output also indicates the nouns that were grouped together
 
 For example, the text "I like python", "I love Python", and "I like C" would be analysed as having 2 topic groups "_python" and "_C":
-
+```python3
     '_python', 2: [('like', 1), ('love', 1),]    {('python', 2), }
     '_C', 1: [('like', 1), ]    {('C', 1), }
+```
 
 ## Meta
 Richard Smith – randkego@gmail.com
@@ -53,12 +57,12 @@ Notes: Additional pre-requisites for Windows:
 
 
 ## Usage
-Script:
+from the command line:
 ```python3
-python topican_by_nouns_on_csv.py <csv file path> <name of text column> <exclude word list> <top_n_noun_groups> <top_n_words> <max_hyponyms> <max_hyponym_depth> <sim_threshold>
+topican_by_nouns_on_csv <csv_file_path> <name_of_text_column> <exclude_word_list> <top_n_noun_groups> <top_n_words> <max_hyponyms> <max_hyponym_depth> <sim_threshold>
 ```
 
-function:
+as a function:
 ```python3
 topican.print_words_associated_with_common_noun_groups(
     nlp, name, free_text_Series, exclude_words, top_n_noun_groups, top_n_words, max_hyponyms, max_hyponym_depth, sim_threshold)
@@ -82,7 +86,7 @@ topican.print_words_associated_with_common_noun_groups(
 ## Usage examples
 script:
 ```python3
-python topican_by_nouns_on_csv.py test.csv text_col None 10 0 100 1 0.7
+topican_by_nouns_on_csv test.csv text_col None 10 0 100 1 0.7
 ```
 
 function:
@@ -114,6 +118,8 @@ topican.print_words_associated_with_common_noun_groups(nlp, "test", test_df['Tex
     * Add script topican_by_nouns_on_csv to apply print_words_associated_with_common_noun_groups to a text column of a CSV file
     * function get_top_word_groups_by_synset_then_similarity: allow max_hyponyms and n_word_groups to be None to indicate no restriction on them
     * function print_words_associated_with_common_noun_groups: do not list words that will be excluded
+* 0.0.20
+    * Update setup.py to add a topican_by_nouns_on_csv as an entry_point to console_scripts to be able to call that scipt directly
 
 ## Contributing
 
