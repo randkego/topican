@@ -11,7 +11,7 @@ Identifies topics in a text file of a CSV file by assuming topics can be identif
 - Output is a list of noun groups and associated context words, in order of frequency  
 
 Requirements:
-(1) Approx 2GB of RAM is required to load spaCy's large English language model (to be able to use similarity)
+(1) Approx 1.8GB of RAM is required to load spaCy's large English language model (to be able to use spaCy's similarity function)
 
 See README.md and topican.print_words_associated_with_common_noun_groups for more information
 """
@@ -23,18 +23,18 @@ import nltk
 import spacy
 import topican
 
-def main(argv):
+def main(argv=sys.argv[1:]):
     parser = argparse.ArgumentParser()
     parser.add_argument("filepath", help="path of CSV file")
     parser.add_argument("text_col", help="name of text column in CSV file")
-    parser.add_argument("exclude_words", help="words to exclude: True to ignore NLTK stop-words | list of words | False | None", nargs='+')
+    parser.add_argument("exclude_words", help="words to exclude: list of words | True to just ignore NLTK stop-words | False | None")
     parser.add_argument("top_n_noun_groups", help="number of noun groups to find (0 to find all noun/'synonym' groups)", type=int)
     parser.add_argument("top_n_words", help="number of associated words to print for each noun group (0 to print all words)", type=int)
     parser.add_argument("max_hyponyms", help="maximum number of hyponyms a word may have before it is ignored - use this to exclude very general words that may not convey useful information (0 to have no limit on the number of hyponyms a word may have)", type=int)
     parser.add_argument("max_hyponym_depth", help="level of hyponym to extract (0 to extract all hyponyms)", type=int)
     parser.add_argument("sim_threshold", help="spaCy similarity level that words must reach to qualify as being similar", type=float)
     
-    args = parser.parse_args()
+    args = parser.parse_args(argv)
 
     if os.path.exists(args.filepath):
         df = pd.read_csv(args.filepath)
@@ -59,4 +59,4 @@ def main(argv):
         nlp, descrip, df[args.text_col], args.exclude_words, args.top_n_noun_groups, args.top_n_words, args.max_hyponyms, args.max_hyponym_depth, args.sim_threshold)
 
 if __name__ == "__main__":
-   main(sys.argv[1:])
+   main()

@@ -4,12 +4,8 @@ from  the command line:
 ```python3
 topican_by_nouns_on_csv  
 ```
-as a function:
-```python3
-topican.print_words_associated_with_common_noun_groups
-```
 Identify topics by assuming topics can be identified from Nouns and a "context" word:  
-- spaCy is used to identify Nouns (including Proper nouns) in the text  
+- [spacy](https://spacy.io/) is used to identify Nouns (including Proper nouns) in the text  
 - nltk WordNet and spaCy are used to group similar nouns together (WordNet "hyponyms" are checked first; spaCy similarity is used if a hyponym is not found)  
 - the top context words are then found for each noun  
 - Output is a list of noun groups and associated context words, in order of frequency  
@@ -33,16 +29,12 @@ Distributed under the MIT license. See ``LICENSE`` for more information.
 Pre-requisites (Linux and Windows):
 
 ```sh
+pip3 install topican
+
 # Install spaCy's large English language model
 # ** Warning: this requires approx 1GB of disk space
 python3 -m spacy download en_core_web_lg
 
-```
-
-Topican:
-
-```sh
-pip3 install topican
 ```
 
 Notes: Additional pre-requisites for Windows:  
@@ -54,7 +46,30 @@ Notes: Additional pre-requisites for Windows:
 ## Usage
 from the command line:
 ```python3
-topican_by_nouns_on_csv <csv_file_path> <name_of_text_column> <exclude_word_list> <top_n_noun_groups> <top_n_words> <max_hyponyms> <max_hyponym_depth> <sim_threshold>
+usage: topican_by_nouns_on_csv [-h]
+                               filepath text_col exclude_words
+                               top_n_noun_groups top_n_words max_hyponyms
+                               max_hyponym_depth sim_threshold
+
+positional arguments:
+  filepath           path of CSV file
+  text_col           name of text column in CSV file
+  exclude_words      words to exclude: list of words | True to just ignore
+                     NLTK stop-words | False | None
+  top_n_noun_groups  number of noun groups to find (0 to find all
+                     noun/'synonym' groups)
+  top_n_words        number of associated words to print for each noun group
+                     (0 to print all words)
+  max_hyponyms       maximum number of hyponyms a word may have before it is
+                     ignored - use this to exclude very general words that may
+                     not convey useful information (0 to have no limit on the
+                     number of hyponyms a word may have)
+  max_hyponym_depth  level of hyponym to extract (0 to extract all hyponyms)
+  sim_threshold      spaCy similarity level that words must reach to qualify
+                     as being similar
+
+optional arguments:
+  -h, --help         show this help message and exit
 ```
 
 as a function:
@@ -117,6 +132,8 @@ topican.print_words_associated_with_common_noun_groups(nlp, "test", test_df['Tex
     * Update setup.py to add a topican_by_nouns_on_csv as an entry_point to console_scripts to be able to call that scipt directly
 * 0.0.21
     * Update setup.py to add the packages required for installation
+* 0.0.22
+    * topican_by_nouns_on_csv.py: fix main signature and add param to parser.parse_args so that topican_by_nouns_on_csv can be called from the command line; remove nargs='+' type for exclude_words
     
 ## Contributing
 
