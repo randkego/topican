@@ -106,7 +106,7 @@ import pandas as pd
 test_df = pd.DataFrame({'Text_col' : ["I love Python", "I really love python", "I like python.", "python", "I like C but I prefer Python", "I don't like C any more", "I don't like python", "I really don't like C"]})
 
 import nltk
-nltk.download('wordnet')
+nltk.download('stopwords')
 
 # Load spaCy's large English language model (the large model is required to be able to use similarity)
 # ** Warning: this requires approx 1.8GB of RAM
@@ -136,6 +136,8 @@ topican.print_words_associated_with_common_noun_groups(nlp, "test", test_df['Tex
     * topican_by_nouns_on_csv.py: fix main signature and add param to parser.parse_args so that topican_by_nouns_on_csv can be called from the command line; remove nargs='+' type for exclude_words
 * 0.0.23
     * topican_by_nouns_on_csv.py: if exclude_words is True, nltk.download('stopwords')
+* 0.0.24
+    * README.md: in the usage examples, nltk.download('stopwords') not 'wordnet'
     
 ## Contributing
 
