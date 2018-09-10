@@ -94,7 +94,7 @@ topican.print_words_associated_with_common_noun_groups(
 
 
 ## Usage examples
-script:
+from the command line:
 ```python3
 topican_by_nouns_on_csv test.csv text_col None 10 0 100 1 0.7
 ```
@@ -105,6 +105,7 @@ function:
 import pandas as pd
 test_df = pd.DataFrame({'Text_col' : ["I love Python", "I really love python", "I like python.", "python", "I like C but I prefer Python", "I don't like C any more", "I don't like python", "I really don't like C"]})
 
+# Download NLTK stop-words if you want them in exclude_words
 import nltk
 nltk.download('stopwords')
 
@@ -137,7 +138,7 @@ topican.print_words_associated_with_common_noun_groups(nlp, "test", test_df['Tex
 * 0.0.23
     * topican_by_nouns_on_csv.py: if exclude_words is True, nltk.download('stopwords')
 * 0.0.24
-    * README.md: in the usage examples, nltk.download('stopwords') not 'wordnet'
+    * README.md: in the usage example for the function, download 'stopwords' not 'wordnet'
     
 ## Contributing
 
